@@ -13,8 +13,17 @@ function App() {
       return;
     }
 
-    const filtered = data.filter((college) => numericRank <= college.closingRank);
+    const filtered = data.filter(
+      (college) => numericRank <= college.closingRank
+    );
     setResults(filtered);
+  };
+
+  // 💥 ENTER KEY FUNCTIONALITY HERE
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleFindColleges();
+    }
   };
 
   return (
@@ -26,11 +35,7 @@ function App() {
         type="number"
         value={rank}
         onChange={(e) => setRank(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') {
-            handleFindColleges();
-          }
-        }}
+        onKeyDown={handleKeyPress}
         placeholder="Enter your EAMCET rank"
       />
 
