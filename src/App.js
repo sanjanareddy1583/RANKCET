@@ -28,7 +28,7 @@ function App() {
         onChange={(e) => setRank(e.target.value)}
         onKeyDown={(e) => {
           if (e.key === 'Enter') {
-            handleFindColleges(); // 🚀 Trigger when Enter key is pressed
+            handleFindColleges();
           }
         }}
         placeholder="Enter your EAMCET rank"
