@@ -40,28 +40,18 @@ function App() {
 
       <button onClick={handleFindColleges}>Find Colleges</button>
 
-      <div
-        className="results"
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          textAlign: 'left',
-          marginTop: '2rem',
-        }}
-      >
-        <div>
-          {results.length === 0 ? (
-            <p>No colleges to show.</p>
-          ) : (
-            <ul>
-              {results.map((college, index) => (
-                <li key={index} style={{ marginBottom: '10px' }}>
-                  <strong>{college.name}</strong> - {college.branch} (Closing Rank: {college.closingRank})
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+      <div className="results">
+        {results.length === 0 ? (
+          <p>No colleges to show.</p>
+        ) : (
+          <ul>
+            {results.map((college, index) => (
+              <li key={index}>
+                <strong>{college.name}</strong> - {college.branch} (Closing Rank: {college.closingRank})
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );
