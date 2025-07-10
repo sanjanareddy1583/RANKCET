@@ -6,4 +6,4 @@ const colleges = [
   { name: "Malla Reddy", rankRange: [25000, 50000], branch: "EEE" },
 ];
 
-export default colleges;
+export default data;

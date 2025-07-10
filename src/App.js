@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './App.css';
-import data from './data'; // This now uses default export
+import data from './data'; // ✅ Default import
 
 function App() {
   const [rank, setRank] = useState('');
