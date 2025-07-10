@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './App.css';
-import data from './data';
+import data from './data'; // This now uses default export
 
 function App() {
   const [rank, setRank] = useState('');
@@ -19,7 +19,6 @@ function App() {
     setResults(filtered);
   };
 
-  // 💥 ENTER KEY FUNCTIONALITY HERE
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
       handleFindColleges();
@@ -27,7 +26,7 @@ function App() {
   };
 
   return (
-    <div className="App">
+    <div className="App" style={{ textAlign: 'center', padding: '2rem', fontFamily: 'Arial' }}>
       <h1>🎓 RANKCET - College Predictor</h1>
       <p>Enter your TS EAMCET 2024 Rank:</p>
 
@@ -37,17 +36,39 @@ function App() {
         onChange={(e) => setRank(e.target.value)}
         onKeyDown={handleKeyPress}
         placeholder="Enter your EAMCET rank"
+        style={{
+          padding: '10px',
+          width: '250px',
+          fontSize: '16px',
+          marginBottom: '1rem'
+        }}
       />
 
-      <button onClick={handleFindColleges}>Find Colleges</button>
+      <br />
 
-      <div className="results">
+      <button
+        onClick={handleFindColleges}
+        style={{
+          padding: '10px 20px',
+          fontSize: '16px',
+          backgroundColor: '#4CAF50',
+          color: 'white',
+          border: 'none',
+          borderRadius: '5px',
+          cursor: 'pointer',
+          marginBottom: '1rem'
+        }}
+      >
+        Find Colleges
+      </button>
+
+      <div className="results" style={{ maxWidth: '500px', margin: '0 auto', textAlign: 'left' }}>
         {results.length === 0 ? (
           <p>No colleges to show.</p>
         ) : (
           <ul>
             {results.map((college, index) => (
-              <li key={index}>
+              <li key={index} style={{ marginBottom: '10px' }}>
                 <strong>{college.name}</strong> - {college.branch} (Closing Rank: {college.closingRank})
               </li>
             ))}
