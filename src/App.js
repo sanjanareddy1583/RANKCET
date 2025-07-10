@@ -1,88 +1,49 @@
-import React, { useState } from "react";
-import { colleges } from "./data"; // ✅ Import from data.js
+import React, { useState } from 'react';
+import './App.css';
+import data from './data';
 
 function App() {
-  const [rank, setRank] = useState("");
+  const [rank, setRank] = useState('');
   const [results, setResults] = useState([]);
 
-  const handleInputChange = (e) => {
-    setRank(e.target.value);
-  };
-
-  const handleSubmit = () => {
+  const handleFindColleges = () => {
     const numericRank = parseInt(rank);
     if (isNaN(numericRank)) {
-      alert("⚠️ Please enter a valid numeric rank");
+      setResults([]);
       return;
     }
 
-    const eligible = colleges.filter(
-      (college) =>
-        numericRank >= college.rankRange[0] &&
-        numericRank <= college.rankRange[1]
-    );
-
-    setResults(eligible);
+    const filtered = data.filter((college) => numericRank <= college.closingRank);
+    setResults(filtered);
   };
 
   return (
-    <div style={{ textAlign: "center", marginTop: "50px", fontFamily: "Arial" }}>
-      <h1 style={{ color: "#007bff" }}>🎓 RANKCET College Predictor</h1>
-      <p>Enter your EAMCET rank to see eligible colleges</p>
+    <div className="App">
+      <h1>🎓 RANKCET - College Predictor</h1>
+      <p>Enter your TS EAMCET 2024 Rank:</p>
 
       <input
         type="number"
-        placeholder="Enter your rank"
         value={rank}
-        onChange={handleInputChange}
-        style={{
-          padding: "10px",
-          width: "250px",
-          fontSize: "16px",
-          borderRadius: "5px",
-          border: "1px solid #ccc",
+        onChange={(e) => setRank(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            handleFindColleges(); // 🚀 Trigger when Enter key is pressed
+          }
         }}
+        placeholder="Enter your EAMCET rank"
       />
 
-      <br />
-      <br />
+      <button onClick={handleFindColleges}>Find Colleges</button>
 
-      <button
-        onClick={handleSubmit}
-        style={{
-          padding: "10px 20px",
-          fontSize: "16px",
-          cursor: "pointer",
-          backgroundColor: "#007bff",
-          color: "white",
-          border: "none",
-          borderRadius: "5px",
-        }}
-      >
-        🔍 Find Colleges
-      </button>
-
-      <br />
-      <br />
-
-      <div id="results" style={{ maxWidth: "600px", margin: "auto" }}>
-        <h3>📋 Eligible Colleges:</h3>
+      <div className="results">
         {results.length === 0 ? (
-          <p>No colleges found for this rank.</p>
+          <p>No colleges to show.</p>
         ) : (
-          <ul style={{ listStyleType: "none", padding: 0 }}>
+          <ul>
             {results.map((college, index) => (
-              <li
-                key={index}
-                style={{
-                  padding: "10px",
-                  marginBottom: "10px",
-                  border: "1px solid #ddd",
-                  borderRadius: "5px",
-                  backgroundColor: "#f9f9f9",
-                }}
-              >
-                <strong>{college.name}</strong> — {college.branch}
+              <li key={index}>
+                <strong>{college.name}</strong> - {college.branch} (Closing Rank: {college.closingRank})
               </li>
             ))}
           </ul>
