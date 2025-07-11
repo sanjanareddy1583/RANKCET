@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import './App.css';
-import data from './data';
+import { collegeData } from './data';
 
 function App() {
   const [rank, setRank] = useState('');
   const [category, setCategory] = useState('OC');
+  const [gender, setGender] = useState('Female');
   const [phase, setPhase] = useState('Phase 1');
   const [results, setResults] = useState([]);
 
@@ -15,12 +16,16 @@ function App() {
       return;
     }
 
-    const filtered = data.filter(
-      (college) =>
-        numericRank <= college.closingRank &&
-        college.category === category &&
-        college.phase === phase
-    );
+    const filtered = collegeData.filter((college) =>
+  college.phase === phase &&
+  college.eligibility.some((entry) =>
+    entry.category === category &&
+    entry.gender === gender &&
+    numericRank >= entry.minRank &&
+    numericRank <= entry.maxRank
+  )
+);
+
 
     setResults(filtered);
   };
@@ -32,11 +37,11 @@ function App() {
   };
 
   return (
-    <div className="App">
-      <h1>🎓 RANKCET - TS EAMCET 2024 College Predictor</h1>
-      <p>Find the best colleges based on your rank, category, and counselling round.</p>
+    <div className="app-container">
+      <div className="glass-card">
+        <h1>🎓 RANKCET - TS EAMCET 2024 College Predictor</h1>
+        <p>Find the best colleges based on your rank, category, and counselling round.</p>
 
-      <div className="input-card">
         <input
           type="number"
           value={rank}
@@ -51,9 +56,13 @@ function App() {
           <option value="BC-B">BC-B</option>
           <option value="BC-C">BC-C</option>
           <option value="BC-D">BC-D</option>
-          <option value="BC-E">BC-E</option>
           <option value="SC">SC</option>
           <option value="ST">ST</option>
+        </select>
+
+        <select value={gender} onChange={(e) => setGender(e.target.value)}>
+          <option value="Female">Female</option>
+          <option value="Male">Male</option>
         </select>
 
         <select value={phase} onChange={(e) => setPhase(e.target.value)}>
@@ -63,37 +72,20 @@ function App() {
         </select>
 
         <button onClick={handleFindColleges}>Find Colleges</button>
-      </div>
 
-      <div className="results">
-        {results.length === 0 ? (
-          <p className="no-results">No colleges to show.</p>
-        ) : (
-          <div className="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>College</th>
-                  <th>Branch</th>
-                  <th>Category</th>
-                  <th>Closing Rank</th>
-                  <th>Phase</th>
-                </tr>
-              </thead>
-              <tbody>
-                {results.map((college, index) => (
-                  <tr key={index}>
-                    <td>{college.name}</td>
-                    <td>{college.branch}</td>
-                    <td>{college.category}</td>
-                    <td>{college.closingRank}</td>
-                    <td>{college.phase}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <div className="results">
+          {results.length === 0 ? (
+            <p>No colleges to show.</p>
+          ) : (
+            <ul>
+              {results.map((college, index) => (
+                <li key={index}>
+                  <strong>{college.name}</strong> - {college.branch} (Closing Rank: {college.closingRank})
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
     </div>
   );
