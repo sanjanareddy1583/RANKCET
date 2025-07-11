@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import './App.css';
-import { collegeData } from './data';
+import data from './data';
 
 function App() {
   const [rank, setRank] = useState('');
   const [category, setCategory] = useState('OC');
-  const [gender, setGender] = useState('Female');
-  const [phase, setPhase] = useState('Phase 1');
+  const [gender, setGender] = useState('Male');
   const [results, setResults] = useState([]);
 
   const handleFindColleges = () => {
@@ -16,16 +15,12 @@ function App() {
       return;
     }
 
-    const filtered = collegeData.filter((college) =>
-  college.phase === phase &&
-  college.eligibility.some((entry) =>
-    entry.category === category &&
-    entry.gender === gender &&
-    numericRank >= entry.minRank &&
-    numericRank <= entry.maxRank
-  )
-);
-
+    const filtered = data.filter(college =>
+      college.category === category &&
+      college.gender === gender &&
+      numericRank >= college.closingRankLow &&
+      numericRank <= college.closingRankHigh
+    );
 
     setResults(filtered);
   };
@@ -47,28 +42,23 @@ function App() {
           value={rank}
           onChange={(e) => setRank(e.target.value)}
           onKeyDown={handleKeyPress}
-          placeholder="Enter your EAMCET rank"
+          placeholder="Enter your rank"
         />
 
         <select value={category} onChange={(e) => setCategory(e.target.value)}>
           <option value="OC">OC</option>
+          <option value="SC">SC</option>
+          <option value="ST">ST</option>
           <option value="BC-A">BC-A</option>
           <option value="BC-B">BC-B</option>
           <option value="BC-C">BC-C</option>
           <option value="BC-D">BC-D</option>
-          <option value="SC">SC</option>
-          <option value="ST">ST</option>
+          <option value="BC-E">BC-E</option>
         </select>
 
         <select value={gender} onChange={(e) => setGender(e.target.value)}>
-          <option value="Female">Female</option>
-          <option value="Male">Male</option>
-        </select>
-
-        <select value={phase} onChange={(e) => setPhase(e.target.value)}>
-          <option value="Phase 1">Phase 1</option>
-          <option value="Phase 2">Phase 2</option>
-          <option value="Final Phase">Final Phase</option>
+          <option value="Male">Boys</option>
+          <option value="Female">Girls</option>
         </select>
 
         <button onClick={handleFindColleges}>Find Colleges</button>
@@ -77,13 +67,28 @@ function App() {
           {results.length === 0 ? (
             <p>No colleges to show.</p>
           ) : (
-            <ul>
-              {results.map((college, index) => (
-                <li key={index}>
-                  <strong>{college.name}</strong> - {college.branch} (Closing Rank: {college.closingRank})
-                </li>
-              ))}
-            </ul>
+            <table className="results-table">
+              <thead>
+                <tr>
+                  <th>College Name</th>
+                  <th>Branch</th>
+                  <th>Gender</th>
+                  <th>Category</th>
+                  <th>Closing Rank</th>
+                </tr>
+              </thead>
+              <tbody>
+                {results.map((college, idx) => (
+                  <tr key={idx}>
+                    <td>{college.name}</td>
+                    <td>{college.branch}</td>
+                    <td>{college.gender}</td>
+                    <td>{college.category}</td>
+                    <td>{college.closingRankHigh}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
         </div>
       </div>

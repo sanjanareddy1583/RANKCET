@@ -1,42 +1,14 @@
-// src/data.js
-
-export const collegeData = [
-  {
-    name: 'JNTU Hyderabad',
-    branch: 'CSE',
-    phase: 'Phase 1',
-    eligibility: [
-      { category: 'OC', gender: 'Male', minRank: 1, maxRank: 1200 },
-      { category: 'OC', gender: 'Female', minRank: 1, maxRank: 1500 },
-      { category: 'BC-A', gender: 'Male', minRank: 1, maxRank: 2500 },
-      { category: 'BC-A', gender: 'Female', minRank: 1, maxRank: 2800 }
-    ]
-  },
-  {
-    name: 'OU College of Engineering',
-    branch: 'ECE',
-    phase: 'Phase 1',
-    eligibility: [
-      { category: 'BC-B', gender: 'Male', minRank: 1000, maxRank: 4000 },
-      { category: 'BC-B', gender: 'Female', minRank: 1000, maxRank: 4500 }
-    ]
-  },
-  {
-    name: 'CBIT',
-    branch: 'IT',
-    phase: 'Phase 2',
-    eligibility: [
-      { category: 'SC', gender: 'Female', minRank: 3000, maxRank: 9000 },
-      { category: 'SC', gender: 'Male', minRank: 3200, maxRank: 9500 }
-    ]
-  },
-  {
-    name: 'Vasavi College',
-    branch: 'CSE',
-    phase: 'Final Phase',
-    eligibility: [
-      { category: 'OC', gender: 'Male', minRank: 1, maxRank: 2000 },
-      { category: 'OC', gender: 'Female', minRank: 1, maxRank: 2200 }
-    ]
-  }
+const data = [
+  { name: "JNTU Hyderabad", branch: "CSE", category: "OC", gender: "Male", closingRankLow: 1, closingRankHigh: 500 },
+  { name: "JNTU Hyderabad", branch: "CSE", category: "SC", gender: "Female", closingRankLow: 1, closingRankHigh: 4000 },
+  { name: "OUCE", branch: "ECE", category: "BC-B", gender: "Male", closingRankLow: 1, closingRankHigh: 1500 },
+  { name: "CBIT", branch: "CSE", category: "ST", gender: "Female", closingRankLow: 1, closingRankHigh: 5000 },
+  { name: "VNR VJIET", branch: "IT", category: "BC-D", gender: "Male", closingRankLow: 1, closingRankHigh: 2500 },
+  { name: "MGIT", branch: "ECE", category: "OC", gender: "Female", closingRankLow: 1, closingRankHigh: 3000 },
+  { name: "Vasavi", branch: "CSE", category: "BC-A", gender: "Female", closingRankLow: 1, closingRankHigh: 2000 },
+  { name: "CVR", branch: "CSE", category: "OC", gender: "Male", closingRankLow: 501, closingRankHigh: 2000 },
+  { name: "MREC", branch: "IT", category: "SC", gender: "Male", closingRankLow: 2000, closingRankHigh: 6000 },
+  { name: "CMR", branch: "ECE", category: "ST", gender: "Female", closingRankLow: 3000, closingRankHigh: 7000 }
 ];
+
+export default data;
