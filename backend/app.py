@@ -15,43 +15,55 @@ def load_and_combine_data():
     all_files = [os.path.join(data_dir, f) for f in os.listdir(data_dir) if f.endswith('.csv')]
 
     df_list = []
-    print("Attempting to load 2024 data...")
+    print("Attempting to load data from CSVs...")
     for f in all_files:
         try:
             # Read CSV, skipping the first row (header is in second row)
             df = pd.read_csv(f, skiprows=[0])
             
             # Rename columns for consistency and easier access
-            # IMPORTANT: We are explicitly keeping 'Inst Code' as 'Inst Code'
+            # IMPORTANT: Explicitly map original CSV headers to desired DataFrame column names.
+            # We are keeping 'Inst Code' as 'Inst Code'.
             df.rename(columns={
-                'College Code': 'College Code', # If your CSV has this column and you want to keep it
-                'Co-Education': 'Co Education', # Handle potential hyphen
+                'Institute Name': 'College Name',
+                'Dist Code': 'District Code',
+                'Co Education': 'Co Education',
+                'College Type': 'College Type',
+                'Year of Estab': 'Year of Establishment',
                 'Branch Code': 'Branch Code',
-                'OC Boys': 'OC BOYS',
-                'OC Girls': 'OC GIRLS',
-                'BC-A Boys': 'BC_A BOYS', # Standardize BC categories
-                'BC-A Girls': 'BC_A GIRLS',
-                'BC-B Boys': 'BC_B BOYS',
-                'BC-B Girls': 'BC_B GIRLS',
-                'BC-C Boys': 'BC_C BOYS',
-                'BC-C Girls': 'BC_C GIRLS',
-                'BC-D Boys': 'BC_D BOYS',
-                'BC-D Girls': 'BC_D GIRLS',
-                'BC-E Boys': 'BC_E BOYS',
-                'BC-E Girls': 'BC_E GIRLS',
-                'SC Boys': 'SC BOYS',
-                'SC Girls': 'SC GIRLS',
-                'ST Boys': 'ST BOYS',
-                'ST Girls': 'ST GIRLS',
-                'EWS GEN OU': 'EWS BOYS', # Map 'EWS GEN OU' to 'EWS BOYS'
-                'EWS GIRLS OU': 'EWS GIRLS', # Map 'EWS GIRLS OU' to 'EWS GIRLS'
+                'Branch Name': 'Branch Name',
+                'OC BOYS': 'OC BOYS',
+                'OC GIRLS': 'OC GIRLS',
+                'BC_A BOYS': 'BC_A BOYS',
+                'BC_A GIRLS': 'BC_A GIRLS',
+                'BC_B BOYS': 'BC_B BOYS',
+                'BC_B GIRLS': 'BC_B GIRLS',
+                'BC_C BOYS': 'BC_C BOYS',
+                'BC_C GIRLS': 'BC_C GIRLS',
+                'BC_D BOYS': 'BC_D BOYS',
+                'BC_D GIRLS': 'BC_D GIRLS',
+                'BC_E BOYS': 'BC_E BOYS',
+                'BC_E GIRLS': 'BC_E GIRLS',
+                'SC BOYS': 'SC BOYS',
+                'SC GIRLS': 'SC GIRLS',
+                'ST BOYS': 'ST BOYS',
+                'ST GIRLS': 'ST GIRLS',
+                'EWS GEN OU': 'EWS BOYS', # Mapping from CSV header 'EWS GEN OU'
+                'EWS GIRLS OU': 'EWS GIRLS', # Mapping from CSV header 'EWS GIRLS OU'
                 'Tuition Fee': 'Tuition Fee',
                 'Affiliated To': 'Affiliated To',
-                # Ensure 'College Name', 'Place', 'District Code', 'College Type', 'Year of Establishment', 'Branch Name', 'Year', 'Phase' are correctly mapped if their CSV names differ.
-                # 'Inst Code' is assumed to be correctly named and present, no renaming needed for it here.
+                # 'Inst Code' is assumed to be correctly named and present in CSV, no renaming for it here.
+                # If 'College Code' also exists and you need it, add it here.
             }, inplace=True)
 
-            # Extract Year and Phase from filename if not present or incorrect
+            # Ensure 'Inst Code' column exists and is string type
+            if 'Inst Code' in df.columns:
+                df['Inst Code'] = df['Inst Code'].astype(str)
+            else:
+                print(f"Warning: 'Inst Code' column not found in {os.path.basename(f)}")
+                df['Inst Code'] = '' # Add an empty column if not found to prevent errors
+
+            # Extract Year and Phase from filename
             filename = os.path.basename(f)
             if '2024' in filename:
                 df['Year'] = 2024
@@ -69,9 +81,6 @@ def load_and_combine_data():
 
     if df_list:
         final_combined_df = pd.concat(df_list, ignore_index=True)
-        # Ensure 'Inst Code' is treated as string if it exists
-        if 'Inst Code' in final_combined_df.columns:
-            final_combined_df['Inst Code'] = final_combined_df['Inst Code'].astype(str)
         print("All EAMCET data combined successfully.")
         print("Final Combined DataFrame Columns:", final_combined_df.columns.tolist())
     else:
@@ -95,23 +104,29 @@ def predict():
 
     rank_column = f"{category} {gender}"
 
+    # Filter the DataFrame based on user inputs
+    # Ensure rank_column exists before filtering
+    if rank_column not in final_combined_df.columns:
+        return jsonify({'error': f"Rank column '{rank_column}' not found in data."}), 400
+
     filtered_df = final_combined_df[
         (final_combined_df['Year'] == int(year_preference)) &
         (final_combined_df['Phase'] == phase_preference) &
-        (final_combined_df[rank_column] >= rank)
+        (pd.to_numeric(final_combined_df[rank_column], errors='coerce') >= rank) # Convert to numeric for comparison
     ].copy()
+
+    # Drop rows where rank_column conversion failed (NaNs)
+    filtered_df.dropna(subset=[rank_column], inplace=True)
+    filtered_df[rank_column] = pd.to_numeric(filtered_df[rank_column]) # Ensure it's numeric for sorting
 
     filtered_df.sort_values(by=rank_column, ascending=True, inplace=True)
 
     # Ensure 'ClosingRank' column exists for consistent frontend display
-    if 'ClosingRank' not in filtered_df.columns:
-        filtered_df['ClosingRank'] = filtered_df[rank_column]
+    filtered_df['ClosingRank'] = filtered_df[rank_column]
 
     # Add 'category' and 'gender' columns if they don't exist, for frontend display
-    if 'category' not in filtered_df.columns:
-        filtered_df['category'] = category
-    if 'gender' not in filtered_df.columns:
-        filtered_df['gender'] = gender
+    filtered_df['category'] = category
+    filtered_df['gender'] = gender
 
     # Select only the columns needed for the frontend display, including 'Inst Code'
     display_columns = [
