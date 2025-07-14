@@ -1,5 +1,6 @@
 /* src/App.css */
 
+/* Base styles for the entire page and main container */
 body, html {
   margin: 0;
   padding: 0;
@@ -21,18 +22,22 @@ body, html {
   align-items: center;
   min-height: 100vh;
   backdrop-filter: blur(5px);
+  padding: 20px; /* Added padding to app-container for overall spacing */
 }
 
 .glass-card {
   background: rgba(255, 255, 255, 0.1);
-  padding: 40px;
+  padding: 30px; /* Adjusted padding */
   border-radius: 20px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
   backdrop-filter: blur(12px);
   color: white;
-  width: 90%;
-  max-width: 500px;
+  width: 95%; /* Increased width for better use of space */
+  max-width: 900px; /* Increased max-width to accommodate side-by-side or stacked layout */
   text-align: center;
+  display: flex; /* Use flexbox for the main card content */
+  flex-direction: column; /* ALWAYS Stack sections vertically */
+  gap: 30px; /* Space between the input and results sections */
 }
 
 .glass-card h1 {
@@ -45,24 +50,43 @@ body, html {
   color: #ffcc00;
 }
 
-.glass-card input,
-.glass-card select,
-.glass-card button {
-  width: 90%;
+.glass-card p {
+    margin-bottom: 20px; /* Space below the description paragraph */
+}
+
+/* Style for the input section */
+.input-section {
+  background: rgba(255, 255, 255, 0.05); /* Slightly different background for input area */
+  padding: 25px;
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column; /* Stack inputs vertically */
+  gap: 15px; /* Space between input elements */
+  align-items: center; /* Center inputs */
+}
+
+/* Adjust input/select/button width within the new input-section */
+.input-section input,
+.input-section select,
+.input-section button {
+  width: 100%; /* Make them fill the input-section width */
+  max-width: 300px; /* Limit their individual width for better aesthetics */
   padding: 10px;
-  margin: 10px auto;
   border-radius: 8px;
   border: none;
   font-size: 1rem;
+  margin: 0; /* Remove default margin from glass-card rule */
 }
 
-.glass-card input,
-.glass-card select {
+.input-section input,
+.input-section select {
   background: rgba(255, 255, 255, 0.8);
   color: #333;
 }
 
-.glass-card button {
+.input-section button {
   background-color: #ffcc00;
   color: #333;
   font-weight: bold;
@@ -70,21 +94,70 @@ body, html {
   transition: background-color 0.3s;
 }
 
-.glass-card button:hover {
+.input-section button:hover {
   background-color: #ffaa00;
 }
 
-.results ul {
-  list-style: none;
-  padding: 0;
-  margin-top: 20px;
-  text-align: left;
+
+/* Style for the results section */
+.results-section {
+  background: rgba(255, 255, 255, 0.05); /* Slightly different background for results area */
+  padding: 25px;
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+  overflow-x: auto; /* Allow horizontal scrolling for the table if it's too wide */
+  max-height: 500px; /* Limit height and add scroll for long lists */
+  overflow-y: auto;
+  text-align: left; /* Align text within results section to left */
+}
+
+/* Container for the table to handle overflow */
+.table-container {
+  overflow-x: auto; /* Ensures horizontal scrolling for the table */
+}
+
+/* Existing table styles (ensure these are present in your App.css) */
+.results-table {
+  width: 100%; /* Make table fill its container */
+  min-width: auto; /* Changed from 600px to auto to allow table to shrink more */
+  border-collapse: collapse;
+  margin-top: 0; /* Remove margin-top as results-section has padding */
   color: white;
 }
 
-.results li {
-  background: rgba(255, 255, 255, 0.2);
-  margin: 10px 0;
-  padding: 12px;
-  border-radius: 10px;
+.results-table th,
+.results-table td {
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 10px;
+  text-align: left;
+  /* REMOVED: white-space: nowrap; */ /* Allow text to wrap */
 }
+
+.results-table th {
+  background: rgba(255, 255, 255, 0.2);
+  font-weight: bold;
+}
+
+.results-table tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.results-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.error-message {
+  color: #ff6b6b;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+.glass-card button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* --- REMOVED RESPONSIVE ADJUSTMENTS FOR LARGER SCREENS TO KEEP STACKED LAYOUT --- */
+/* The @media (min-width: 768px) block has been removed */
