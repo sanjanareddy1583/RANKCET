@@ -23,7 +23,7 @@ function App() {
     setError(null);
 
     try {
-      const flaskApiUrl = 'http://127.0.0.1:5000/predict';
+      const flaskApiUrl = 'https://rankcet.onrender.com/predict';
 
       const response = await fetch(flaskApiUrl, {
         method: 'POST',
