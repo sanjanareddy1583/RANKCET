@@ -11,7 +11,19 @@ final_combined_df = pd.DataFrame()
 
 def load_and_combine_data():
     global final_combined_df
-    data_dir = os.path.join(os.path.dirname(__file__), 'data')
+    
+    # --- CRITICAL CHANGE: Use an absolute path for data_dir ---
+    # This ensures the 'data' directory is found relative to app.py's location
+    data_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'data'))
+    
+    print(f"Attempting to load data from: {data_dir}") # Debugging print
+    
+    # Check if the data directory actually exists
+    if not os.path.exists(data_dir):
+        print(f"Error: Data directory '{data_dir}' does not exist. Please ensure it's in your GitHub repo.")
+        # Raise an error to stop deployment if data is missing
+        raise FileNotFoundError(f"Data directory '{data_dir}' not found.")
+        
     all_files = [os.path.join(data_dir, f) for f in os.listdir(data_dir) if f.endswith('.csv')]
 
     df_list = []
@@ -22,8 +34,6 @@ def load_and_combine_data():
             df = pd.read_csv(f, skiprows=[0])
             
             # Rename columns for consistency and easier access
-            # IMPORTANT: Explicitly map original CSV headers to desired DataFrame column names.
-            # We are keeping 'Inst Code' as 'Inst Code'.
             df.rename(columns={
                 'Institute Name': 'College Name',
                 'Dist Code': 'District Code',
@@ -32,35 +42,34 @@ def load_and_combine_data():
                 'Year of Estab': 'Year of Establishment',
                 'Branch Code': 'Branch Code',
                 'Branch Name': 'Branch Name',
-                'OC BOYS': 'OC BOYS',
-                'OC GIRLS': 'OC GIRLS',
-                'BC_A BOYS': 'BC_A BOYS',
-                'BC_A GIRLS': 'BC_A GIRLS',
-                'BC_B BOYS': 'BC_B BOYS',
-                'BC_B GIRLS': 'BC_B GIRLS',
-                'BC_C BOYS': 'BC_C BOYS',
-                'BC_C GIRLS': 'BC_C GIRLS',
-                'BC_D BOYS': 'BC_D BOYS',
-                'BC_D GIRLS': 'BC_D GIRLS',
-                'BC_E BOYS': 'BC_E BOYS',
-                'BC_E GIRLS': 'BC_E GIRLS',
-                'SC BOYS': 'SC BOYS',
-                'SC GIRLS': 'SC GIRLS',
-                'ST BOYS': 'ST BOYS',
-                'ST GIRLS': 'ST GIRLS',
+                'OC Boys': 'OC BOYS',
+                'OC Girls': 'OC GIRLS',
+                'BC-A Boys': 'BC_A BOYS',
+                'BC-A Girls': 'BC_A GIRLS',
+                'BC-B Boys': 'BC_B BOYS',
+                'BC-B Girls': 'BC_B GIRLS',
+                'BC-C Boys': 'BC_C BOYS',
+                'BC-C Girls': 'BC_C GIRLS',
+                'BC-D Boys': 'BC_D BOYS',
+                'BC-D Girls': 'BC_D GIRLS',
+                'BC-E Boys': 'BC_E BOYS',
+                'BC-E Girls': 'BC_E GIRLS',
+                'SC Boys': 'SC BOYS',
+                'SC Girls': 'SC GIRLS',
+                'ST Boys': 'ST BOYS',
+                'ST Girls': 'ST GIRLS',
                 'EWS GEN OU': 'EWS BOYS', # Mapping from CSV header 'EWS GEN OU'
                 'EWS GIRLS OU': 'EWS GIRLS', # Mapping from CSV header 'EWS GIRLS OU'
                 'Tuition Fee': 'Tuition Fee',
                 'Affiliated To': 'Affiliated To',
                 # 'Inst Code' is assumed to be correctly named and present in CSV, no renaming for it here.
-                # If 'College Code' also exists and you need it, add it here.
             }, inplace=True)
 
             # Ensure 'Inst Code' column exists and is string type
             if 'Inst Code' in df.columns:
                 df['Inst Code'] = df['Inst Code'].astype(str)
             else:
-                print(f"Warning: 'Inst Code' column not found in {os.path.basename(f)}")
+                print(f"Warning: 'Inst Code' column not found in {os.path.basename(f)}. Adding empty column.")
                 df['Inst Code'] = '' # Add an empty column if not found to prevent errors
 
             # Extract Year and Phase from filename
@@ -105,7 +114,6 @@ def predict():
     rank_column = f"{category} {gender}"
 
     # Filter the DataFrame based on user inputs
-    # Ensure rank_column exists before filtering
     if rank_column not in final_combined_df.columns:
         return jsonify({'error': f"Rank column '{rank_column}' not found in data."}), 400
 
