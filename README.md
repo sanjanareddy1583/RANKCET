@@ -58,8 +58,10 @@ The project was set up and run locally for development and testing using the fol
 
 ⏺️ Git: For initializing the repository and managing version control.
 
+
+
 1. Repository Setup
-2. First, this project repository was initialized and set up on the local machine using Git:
+First, this project repository was initialized and set up on the local machine using Git:
 
 git init
 git add .
