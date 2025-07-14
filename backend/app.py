@@ -41,38 +41,52 @@ def load_all_data():
                 df['Phase'] = phase_name
 
                 # --- CRITICAL: RENAME COLUMNS HERE FOR YOUR 2024 DATA ---
-                # Removed errors='ignore' to make it fail if a column is not found
+                # Changed 'College Code' to 'Inst Code' to match frontend expectation
                 df.rename(columns={
-                    'Inst\n Code': 'College Code', # Assuming 'Inst\n Code' is the exact CSV header
+                    'Inst\n Code': 'Inst Code', # Fix: Directly rename to 'Inst Code'
                     'Institute Name': 'College Name',
                     'Place': 'Place',
-                    'Dist \nCode': 'District Code', # Assuming 'Dist \nCode' is the exact CSV header
+                    'Dist \nCode': 'District Code', 
                     'Co Education': 'Co Education',
                     'College Type': 'College Type',
                     'Year of Estab': 'Year of Establishment',
                     'Branch Code': 'Branch Code',
                     'Branch Name': 'Branch Name',
-                    'OC \nBOYS': 'OC BOYS', # Assuming 'OC \nBOYS' is the exact CSV header
-                    'OC \nGIRLS': 'OC GIRLS', # Assuming 'OC \nGIRLS' is the exact CSV header
-                    'BC_A \nBOYS': 'BC_A BOYS', # Assuming 'BC_A \nBOYS' is the exact CSV header
-                    'BC_A \nGIRLS': 'BC_A GIRLS', # Assuming 'BC_A \nGIRLS' is the exact CSV header
-                    'BC_B \nBOYS': 'BC_B BOYS', # Assuming 'BC_B \nBOYS' is the exact CSV header
-                    'BC_B \nGIRLS': 'BC_B GIRLS', # Assuming 'BC_B \nGIRLS' is the exact CSV header
-                    'BC_C \nBOYS': 'BC_C BOYS', # Assuming 'BC_C \nBOYS' is the exact CSV header
-                    'BC_C \nGIRLS': 'BC_C GIRLS', # Assuming 'BC_C \nGIRLS' is the exact CSV header
-                    'BC_D \nBOYS': 'BC_D BOYS', # Assuming 'BC_D \nBOYS' is the exact CSV header
-                    'BC_D \nGIRLS': 'BC_D GIRLS', # Assuming 'BC_D \nGIRLS' is the exact CSV header
-                    'BC_E \nBOYS': 'BC_E BOYS', # Assuming 'BC_E \nBOYS' is the exact CSV header
-                    'BC_E \nGIRLS': 'BC_E GIRLS', # Assuming 'BC_E \nGIRLS' is the exact CSV header
-                    'SC \nBOYS': 'SC BOYS', # Assuming 'SC \nBOYS' is the exact CSV header
-                    'SC \nGIRLS': 'SC GIRLS', # Assuming 'SC \nGIRLS' is the exact CSV header
-                    'ST \nBOYS': 'ST BOYS', # Assuming 'ST \nBOYS' is the exact CSV header
-                    'ST \nGIRLS': 'ST GIRLS', # Assuming 'ST \nGIRLS' is the exact CSV header
-                    'EWS \nGEN OU': 'EWS BOYS', # Assuming 'EWS \nGEN OU' is the exact CSV header
-                    'EWS \nGIRLS OU': 'EWS GIRLS', # Assuming 'EWS \nGIRLS OU' is the exact CSV header
+                    'OC \nBOYS': 'OC BOYS', 
+                    'OC \nGIRLS': 'OC GIRLS', 
+                    'BC_A \nBOYS': 'BC_A BOYS', 
+                    'BC_A \nGIRLS': 'BC_A GIRLS', 
+                    'BC_B \nBOYS': 'BC_B BOYS', 
+                    'BC_B \nGIRLS': 'BC_B GIRLS', 
+                    'BC_C \nBOYS': 'BC_C BOYS', 
+                    'BC_C \nGIRLS': 'BC_C GIRLS', 
+                    'BC_D \nBOYS': 'BC_D BOYS', 
+                    'BC_D \nGIRLS': 'BC_D GIRLS', 
+                    'BC_E \nBOYS': 'BC_E BOYS', 
+                    'BC_E \nGIRLS': 'BC_E GIRLS', 
+                    'SC \nBOYS': 'SC BOYS', 
+                    'SC \nGIRLS': 'SC GIRLS', 
+                    'ST \nBOYS': 'ST BOYS', 
+                    'ST \nGIRLS': 'ST GIRLS', 
+                    'EWS \nGEN OU': 'EWS BOYS', 
+                    'EWS \nGIRLS OU': 'EWS GIRLS', 
                     'Tuition Fee': 'Tuition Fee',
                     'Affiliated To': 'Affiliated To'
-                }, inplace=True) # Removed errors='ignore'
+                }, inplace=True) 
+
+                # --- REMOVED: No longer need to add empty 'Inst Code' if it's renamed correctly ---
+                # if 'Inst Code' in df.columns:
+                #     df['Inst Code'] = df['Inst Code'].astype(str)
+                # else:
+                #     print(f"Warning: 'Inst Code' column not found in {os.path.basename(f_path)}. Adding empty column.")
+                #     df['Inst Code'] = '' 
+                
+                # Ensure 'Inst Code' is string type after renaming
+                if 'Inst Code' in df.columns:
+                    df['Inst Code'] = df['Inst Code'].astype(str)
+                else:
+                    print(f"CRITICAL ERROR: 'Inst Code' column not found after all renaming attempts in {os.path.basename(f_path)}. This will cause issues.")
+
 
                 # --- DEBUGGING: Print columns AFTER renaming ---
                 print(f"DEBUG: Columns in {filename} AFTER renaming: {df.columns.tolist()}")
@@ -87,7 +101,6 @@ def load_all_data():
     # Combine all loaded DataFrames
     if all_eamcet_data_frames:
         eamcet_data = pd.concat(all_eamcet_data_frames, ignore_index=True)
-        # No need to rename 'Institute Name' to 'College Name' here if already done above
         print("\nAll EAMCET data combined successfully.")
         print("Final Combined DataFrame Columns:", eamcet_data.columns.tolist())
     else:
@@ -134,8 +147,9 @@ def predict_college():
 
             colleges_meeting_criteria = colleges_meeting_criteria.sort_values(by=rank_column, ascending=True)
             
+            # Use 'Inst Code' directly as it's now the target name
             cols_to_return = [
-                'College Code', # Use 'College Code' as renamed
+                'Inst Code', 
                 'College Name',
                 'Branch Name',
                 'Year',
