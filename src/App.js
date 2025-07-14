@@ -24,7 +24,8 @@ function App() {
 
     try {
       // Use your deployed Render backend URL here
-      const flaskApiUrl = 'https://rankcet.onrender.com/predict'; // MAKE SURE THIS IS YOUR CORRECT RENDER URL
+      // IMPORTANT: Ensure this URL is correct for your deployed Flask backend
+      const flaskApiUrl = 'https://rankcet.onrender.com/predict'; 
 
       const response = await fetch(flaskApiUrl, {
         method: 'POST',
@@ -144,7 +145,7 @@ function App() {
                     {results.map((college, idx) => (
                       <tr key={idx}>
                         {/* ADDED: College Code data cell */}
-                        <td>{college['College Code']}</td>
+                        <td>{college['College Code']}</td> {/* Expecting 'College Code' key from backend */}
                         <td>{college['College Name']}</td>
                         <td>{college['Branch Name']}</td>
                         <td>{`${college.category} ${college.gender}`}</td>
