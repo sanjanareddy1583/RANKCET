@@ -14,13 +14,22 @@ def load_and_combine_data():
     
     # --- CRITICAL CHANGE: Use an absolute path for data_dir ---
     # This ensures the 'data' directory is found relative to app.py's location
-    data_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'data'))
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    data_dir = os.path.join(base_dir, 'data')
     
+    print(f"DEBUG: Current working directory: {os.getcwd()}") # Added debug print
+    print(f"DEBUG: app.py directory: {base_dir}") # Added debug print
     print(f"Attempting to load data from: {data_dir}") # Debugging print
     
+    # --- NEW: Print contents of the backend directory ---
+    try:
+        print(f"DEBUG: Contents of {base_dir}: {os.listdir(base_dir)}")
+    except Exception as e:
+        print(f"DEBUG: Could not list contents of {base_dir}: {e}")
+
     # Check if the data directory actually exists
     if not os.path.exists(data_dir):
-        print(f"Error: Data directory '{data_dir}' does not exist. Please ensure it's in your GitHub repo.")
+        print(f"Error: Data directory '{data_dir}' does not exist. Please ensure it's in your GitHub repo and correctly capitalized.")
         # Raise an error to stop deployment if data is missing
         raise FileNotFoundError(f"Data directory '{data_dir}' not found.")
         
@@ -49,9 +58,9 @@ def load_and_combine_data():
                 'BC-B Boys': 'BC_B BOYS',
                 'BC-B Girls': 'BC_B GIRLS',
                 'BC-C Boys': 'BC_C BOYS',
-                'BC-C Girls': 'BC_C GIRLS',
+                'BC_C Girls': 'BC_C GIRLS',
                 'BC-D Boys': 'BC_D BOYS',
-                'BC-D Girls': 'BC_D GIRLS',
+                'BC_D Girls': 'BC_D GIRLS',
                 'BC-E Boys': 'BC_E BOYS',
                 'BC-E Girls': 'BC_E GIRLS',
                 'SC Boys': 'SC BOYS',
