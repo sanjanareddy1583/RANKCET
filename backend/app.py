@@ -22,9 +22,9 @@ def load_and_combine_data():
             df = pd.read_csv(f, skiprows=[0])
             
             # Rename columns for consistency and easier access
-            # IMPORTANT: We are now keeping 'Inst Code' as 'Inst Code'
+            # IMPORTANT: We are explicitly keeping 'Inst Code' as 'Inst Code'
             df.rename(columns={
-                #'College Code': 'College Code', # If your CSV has this, keep it.
+                'College Code': 'College Code', # If your CSV has this column and you want to keep it
                 'Co-Education': 'Co Education', # Handle potential hyphen
                 'Branch Code': 'Branch Code',
                 'OC Boys': 'OC BOYS',
@@ -43,12 +43,12 @@ def load_and_combine_data():
                 'SC Girls': 'SC GIRLS',
                 'ST Boys': 'ST BOYS',
                 'ST Girls': 'ST GIRLS',
-                'EWS Boys': 'EWS BOYS',
-                'EWS Girls': 'EWS GIRLS',
+                'EWS GEN OU': 'EWS BOYS', # Map 'EWS GEN OU' to 'EWS BOYS'
+                'EWS GIRLS OU': 'EWS GIRLS', # Map 'EWS GIRLS OU' to 'EWS GIRLS'
                 'Tuition Fee': 'Tuition Fee',
                 'Affiliated To': 'Affiliated To',
                 # Ensure 'College Name', 'Place', 'District Code', 'College Type', 'Year of Establishment', 'Branch Name', 'Year', 'Phase' are correctly mapped if their CSV names differ.
-                # For 'Inst Code', we assume it's already named 'Inst Code' in the CSV and we want to keep it.
+                # 'Inst Code' is assumed to be correctly named and present, no renaming needed for it here.
             }, inplace=True)
 
             # Extract Year and Phase from filename if not present or incorrect
