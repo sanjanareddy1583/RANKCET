@@ -6,7 +6,7 @@ function App() {
   const [category, setCategory] = useState('OC');
   const [gender, setGender] = useState('BOYS');
   const [yearPreference, setYearPreference] = useState('2024');
-  const [phasePreference, setPhasePreference] = useState('Phase 1'); // Keep default as Phase 1
+  const [phasePreference, setPhasePreference] = useState('Phase 1'); 
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -24,7 +24,7 @@ function App() {
 
     try {
       // Use your deployed Render backend URL here
-      const flaskApiUrl = 'https://rankcet.onrender.com/predict'; // Make sure this is YOUR Render URL
+      const flaskApiUrl = 'https://rankcet.onrender.com/predict'; // MAKE SURE THIS IS YOUR CORRECT RENDER URL
 
       const response = await fetch(flaskApiUrl, {
         method: 'POST',
@@ -135,7 +135,7 @@ function App() {
                 <table className="results-table">
                   <thead>
                     <tr>
-                      {/* NEW: College Code column */}
+                      {/* ADDED: College Code column header */}
                       <th>Code</th>
                       <th>College Name</th><th>Branch</th><th>Category/Gender</th><th>Closing Rank</th><th>Year</th><th>Phase</th>
                     </tr>
@@ -143,7 +143,7 @@ function App() {
                   <tbody>
                     {results.map((college, idx) => (
                       <tr key={idx}>
-                        {/* Display College Code */}
+                        {/* ADDED: College Code data cell */}
                         <td>{college['College Code']}</td>
                         <td>{college['College Name']}</td>
                         <td>{college['Branch Name']}</td>
