@@ -80,7 +80,8 @@ function App() {
     <div className="app-container">
       <div className="glass-card">
         <>
-          <h1>🎓 RANKCET - TS EAMCET 2024 College Predictor</h1>
+          {/* REMOVED "2024" from the heading */}
+          <h1>🎓 RANKCET - TS EAMCET College Predictor</h1> 
           <p>Find the best colleges based on your rank, category, and counselling round.</p>
 
           <div className="input-section">
@@ -136,14 +137,14 @@ function App() {
                 <table className="results-table">
                   <thead>
                     <tr>
-                      <th>Code</th> {/* This header is fine, it's just a label */}
+                      <th>Code</th>
                       <th>College Name</th><th>Branch</th><th>Category/Gender</th><th>Closing Rank</th><th>Year</th><th>Phase</th>
                     </tr>
                   </thead>
                   <tbody>
                     {results.map((college, idx) => (
                       <tr key={idx}>
-                        <td>{college['Inst Code']}</td> {/* Now correctly looking for 'Inst Code' */}
+                        <td>{college['Inst Code']}</td>
                         <td>{college['College Name']}</td>
                         <td>{college['Branch Name']}</td>
                         <td>{`${college.category} ${college.gender}`}</td>
