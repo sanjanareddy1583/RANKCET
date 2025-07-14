@@ -1,168 +1,180 @@
 import pandas as pd
-from flask import Flask, request, jsonify
-from flask_cors import CORS, cross_origin
 import os
+from flask import Flask, render_template, request, jsonify
+from flask_cors import CORS # This is crucial for connecting frontend and backend
 
 app = Flask(__name__)
-CORS(app) # Enable CORS for all routes
+CORS(app) # Enable CORS for all routes - allows your React app to talk to Flask
 
-# Global variable to store combined DataFrame
-final_combined_df = pd.DataFrame()
+# Define your data directory relative to app.py
+DATA_DIR = 'DATA' # Ensure this matches your folder name exactly (case-sensitive)
 
-def load_and_combine_data():
-    global final_combined_df
-    
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    data_dir = os.path.join(base_dir, 'DATA') 
-    
-    print(f"DEBUG: Current working directory: {os.getcwd()}")
-    print(f"DEBUG: app.py directory: {base_dir}")
-    print(f"Attempting to load data from: {data_dir}")
-    
-    try:
-        print(f"DEBUG: Contents of {base_dir}: {os.listdir(base_dir)}")
-        if os.path.exists(data_dir):
-            print(f"DEBUG: Contents of {data_dir}: {os.listdir(data_dir)}")
-        else:
-            print(f"DEBUG: Data directory '{data_dir}' does not exist during os.listdir check.")
-    except Exception as e:
-        print(f"DEBUG: Could not list contents or access data_dir: {e}")
+# Global variables to store combined EAMCET data
+eamcet_data = pd.DataFrame()
 
-    if not os.path.exists(data_dir):
-        print(f"Error: Data directory '{data_dir}' does not exist. Please ensure it's in your GitHub repo and correctly capitalized ('DATA').")
-        raise FileNotFoundError(f"Data directory '{data_dir}' not found.")
-        
-    all_files = [os.path.join(data_dir, f) for f in os.listdir(data_dir) if f.endswith('.csv')]
+def load_all_data():
+    """
+    Loads and combines EAMCET cutoff data from CSVs.
+    Adds 'Year' and 'Phase' columns to the combined DataFrame.
+    This function runs once when the Flask server starts.
+    """
+    global eamcet_data # Declare as global to modify it
 
-    df_list = []
-    print("Attempting to load data from CSVs...")
-    for f_path in all_files:
-        try:
-            df = pd.read_csv(f_path, skiprows=[0])
-            
-            # --- CRITICAL FIX: Match CSV headers exactly, including newlines and spaces ---
-            df.rename(columns={
-                'Inst\n Code': 'Inst Code', # Fix for Inst Code
-                'Institute Name': 'College Name',
-                'Dist\nCode': 'District Code', # Fix for Dist Code
-                'Co Education': 'Co Education', # This seems correct
-                'College Type': 'College Type', # This seems correct
-                'Year of Estab': 'Year of Establishment', # This seems correct
-                'Branch Code': 'Branch Code', # This seems correct
-                'Branch Name': 'Branch Name', # This seems correct
-                'OC\nBOYS': 'OC BOYS', # Fix for OC BOYS
-                'OC\nGIRLS': 'OC GIRLS', # Fix for OC GIRLS
-                'BC_A\nBOYS': 'BC_A BOYS', # Fix for BC_A BOYS
-                'BC_A\nGIRLS': 'BC_A GIRLS', # Fix for BC_A GIRLS
-                'BC_B\nBOYS': 'BC_B BOYS', # Fix for BC_B BOYS
-                'BC_B\nGIRLS': 'BC_B GIRLS', # Fix for BC_B GIRLS
-                'BC_C\nBOYS': 'BC_C BOYS', # Fix for BC_C BOYS
-                'BC_C\nGIRLS': 'BC_C GIRLS', # Fix for BC_C GIRLS
-                'BC_D\nBOYS': 'BC_D BOYS', # Fix for BC_D BOYS
-                'BC_D\nGIRLS': 'BC_D GIRLS', # Fix for BC_D GIRLS
-                'BC_E\nBOYS': 'BC_E BOYS', # Fix for BC_E BOYS
-                'BC_E\nGIRLS': 'BC_E GIRLS', # Fix for BC_E GIRLS
-                'SC\nBOYS': 'SC BOYS', # Fix for SC BOYS
-                'SC\nGIRLS': 'SC GIRLS', # Fix for SC GIRLS
-                'ST\nBOYS': 'ST BOYS', # Fix for ST BOYS
-                'ST\nGIRLS': 'ST GIRLS', # Fix for ST GIRLS
-                'EWS\nGEN OU': 'EWS BOYS', # Mapping from CSV header 'EWS GEN OU'
-                'EWS\nGIRLS OU': 'EWS GIRLS', # Mapping from CSV header 'EWS GIRLS OU'
-                'Tuition Fee': 'Tuition Fee', # This seems correct
-                'Affiliated To': 'Affiliated To', # This seems correct
-            }, inplace=True)
+    all_eamcet_data_frames = []
 
-            # Ensure 'Inst Code' column exists and is string type AFTER renaming
-            if 'Inst Code' in df.columns:
-                df['Inst Code'] = df['Inst Code'].astype(str)
-            else:
-                print(f"Warning: 'Inst Code' column still not found after renaming in {os.path.basename(f_path)}. Adding empty column.")
-                df['Inst Code'] = '' 
+    csv_files_2024 = {
+        '2024_Phase1.csv': 'Phase 1',
+        '2024_Phase2.csv': 'Phase 2',
+        '2024_FinalPhase.csv': 'Final Phase'
+    }
+    print("\nAttempting to load 2024 data...")
+    for filename, phase_name in csv_files_2024.items():
+        filepath = os.path.join(DATA_DIR, filename)
+        if os.path.exists(filepath):
+            try:
+                df = pd.read_csv(filepath, encoding='latin1', skiprows=1)
+                
+                # --- DEBUGGING: Print columns BEFORE renaming ---
+                print(f"DEBUG: Columns in {filename} BEFORE renaming: {df.columns.tolist()}")
 
-            # Extract Year and Phase from filename
-            filename = os.path.basename(f_path)
-            if '2024' in filename:
                 df['Year'] = 2024
-            if 'Phase1' in filename:
-                df['Phase'] = 'Phase 1'
-            elif 'Phase2' in filename:
-                df['Phase'] = 'Phase 2'
-            elif 'FinalPhase' in filename:
-                df['Phase'] = 'Final Phase'
-            
-            df_list.append(df)
-            print(f"Loaded {os.path.basename(f_path)}")
-        except Exception as e:
-            print(f"Error loading {f_path}: {e}")
+                df['Phase'] = phase_name
 
-    if df_list:
-        final_combined_df = pd.concat(df_list, ignore_index=True)
-        print("All EAMCET data combined successfully.")
-        print("Final Combined DataFrame Columns:", final_combined_df.columns.tolist())
+                # --- CRITICAL: RENAME COLUMNS HERE FOR YOUR 2024 DATA ---
+                # Removed errors='ignore' to make it fail if a column is not found
+                df.rename(columns={
+                    'Inst\n Code': 'College Code', # Assuming 'Inst\n Code' is the exact CSV header
+                    'Institute Name': 'College Name',
+                    'Place': 'Place',
+                    'Dist \nCode': 'District Code', # Assuming 'Dist \nCode' is the exact CSV header
+                    'Co Education': 'Co Education',
+                    'College Type': 'College Type',
+                    'Year of Estab': 'Year of Establishment',
+                    'Branch Code': 'Branch Code',
+                    'Branch Name': 'Branch Name',
+                    'OC \nBOYS': 'OC BOYS', # Assuming 'OC \nBOYS' is the exact CSV header
+                    'OC \nGIRLS': 'OC GIRLS', # Assuming 'OC \nGIRLS' is the exact CSV header
+                    'BC_A \nBOYS': 'BC_A BOYS', # Assuming 'BC_A \nBOYS' is the exact CSV header
+                    'BC_A \nGIRLS': 'BC_A GIRLS', # Assuming 'BC_A \nGIRLS' is the exact CSV header
+                    'BC_B \nBOYS': 'BC_B BOYS', # Assuming 'BC_B \nBOYS' is the exact CSV header
+                    'BC_B \nGIRLS': 'BC_B GIRLS', # Assuming 'BC_B \nGIRLS' is the exact CSV header
+                    'BC_C \nBOYS': 'BC_C BOYS', # Assuming 'BC_C \nBOYS' is the exact CSV header
+                    'BC_C \nGIRLS': 'BC_C GIRLS', # Assuming 'BC_C \nGIRLS' is the exact CSV header
+                    'BC_D \nBOYS': 'BC_D BOYS', # Assuming 'BC_D \nBOYS' is the exact CSV header
+                    'BC_D \nGIRLS': 'BC_D GIRLS', # Assuming 'BC_D \nGIRLS' is the exact CSV header
+                    'BC_E \nBOYS': 'BC_E BOYS', # Assuming 'BC_E \nBOYS' is the exact CSV header
+                    'BC_E \nGIRLS': 'BC_E GIRLS', # Assuming 'BC_E \nGIRLS' is the exact CSV header
+                    'SC \nBOYS': 'SC BOYS', # Assuming 'SC \nBOYS' is the exact CSV header
+                    'SC \nGIRLS': 'SC GIRLS', # Assuming 'SC \nGIRLS' is the exact CSV header
+                    'ST \nBOYS': 'ST BOYS', # Assuming 'ST \nBOYS' is the exact CSV header
+                    'ST \nGIRLS': 'ST GIRLS', # Assuming 'ST \nGIRLS' is the exact CSV header
+                    'EWS \nGEN OU': 'EWS BOYS', # Assuming 'EWS \nGEN OU' is the exact CSV header
+                    'EWS \nGIRLS OU': 'EWS GIRLS', # Assuming 'EWS \nGIRLS OU' is the exact CSV header
+                    'Tuition Fee': 'Tuition Fee',
+                    'Affiliated To': 'Affiliated To'
+                }, inplace=True) # Removed errors='ignore'
+
+                # --- DEBUGGING: Print columns AFTER renaming ---
+                print(f"DEBUG: Columns in {filename} AFTER renaming: {df.columns.tolist()}")
+
+                all_eamcet_data_frames.append(df)
+                print(f"Loaded 2024 {filename}")
+            except Exception as e:
+                print(f"Error loading 2024 {filename}: {e}")
+        else:
+            print(f"Warning: 2024 {filename} not found. Skipping.")
+
+    # Combine all loaded DataFrames
+    if all_eamcet_data_frames:
+        eamcet_data = pd.concat(all_eamcet_data_frames, ignore_index=True)
+        # No need to rename 'Institute Name' to 'College Name' here if already done above
+        print("\nAll EAMCET data combined successfully.")
+        print("Final Combined DataFrame Columns:", eamcet_data.columns.tolist())
     else:
-        print("No CSV files loaded. Combined DataFrame is empty.")
+        print("No EAMCET data loaded from any source.")
+        eamcet_data = pd.DataFrame()
 
-# Call the function to load data when the app starts
-load_and_combine_data()
 
+# Load data once when the Flask application starts
+with app.app_context():
+    load_all_data()
+
+
+# Route to handle requests from your React frontend
 @app.route('/predict', methods=['POST'])
-@cross_origin()
-def predict():
-    data = request.get_json()
-    rank = data.get('rank')
-    category = data.get('category')
-    gender = data.get('gender')
-    year_preference = data.get('year_preference')
-    phase_preference = data.get('phase_preference')
+def predict_college():
+    try:
+        data_from_frontend = request.get_json()
+        rank = int(data_from_frontend['rank'])
+        category = data_from_frontend['category']
+        gender = data_from_frontend['gender']
+        year_preference = int(data_from_frontend['year_preference'])
+        phase_preference = data_from_frontend['phase_preference']
 
-    if not all([rank, category, gender, year_preference, phase_preference]):
-        return jsonify({'error': 'Missing data. Please provide rank, category, gender, year, and phase.'}), 400
+        # Construct the rank column name using the standardized format
+        rank_column = f"{category} {gender}"
 
-    # Construct the rank column name using the standardized format
-    rank_column = f"{category} {gender}"
+        if eamcet_data.empty:
+            return jsonify({'predictions': [], 'error': 'EAMCET data not loaded on server. Please check server logs.'}), 500
 
-    # Filter the DataFrame based on user inputs
-    if rank_column not in final_combined_df.columns:
-        # This error should now be less likely if renaming is correct
-        return jsonify({'error': f"Rank column '{rank_column}' not found in data after processing."}), 400
+        filtered_by_year_phase = eamcet_data[
+            (eamcet_data['Year'] == year_preference) &
+            (eamcet_data['Phase'] == phase_preference)
+        ].copy()
 
-    filtered_df = final_combined_df[
-        (final_combined_df['Year'] == int(year_preference)) &
-        (final_combined_df['Phase'] == phase_preference) &
-        (pd.to_numeric(final_combined_df[rank_column], errors='coerce') >= rank) # Convert to numeric for comparison
-    ].copy()
+        predicted_colleges_list = []
 
-    # Drop rows where rank_column conversion failed (NaNs)
-    filtered_df.dropna(subset=[rank_column], inplace=True)
-    filtered_df[rank_column] = pd.to_numeric(filtered_df[rank_column]) # Ensure it's numeric for sorting
+        if rank_column in filtered_by_year_phase.columns:
+            filtered_by_year_phase[rank_column] = pd.to_numeric(filtered_by_year_phase[rank_column], errors='coerce')
 
-    filtered_df.sort_values(by=rank_column, ascending=True, inplace=True)
+            colleges_meeting_criteria = filtered_by_year_phase[
+                (filtered_by_year_phase[rank_column].notna()) &
+                (filtered_by_year_phase[rank_column] >= rank)
+            ]
 
-    # Ensure 'ClosingRank' column exists for consistent frontend display
-    filtered_df['ClosingRank'] = filtered_df[rank_column]
+            colleges_meeting_criteria = colleges_meeting_criteria.sort_values(by=rank_column, ascending=True)
+            
+            cols_to_return = [
+                'College Code', # Use 'College Code' as renamed
+                'College Name',
+                'Branch Name',
+                'Year',
+                'Phase',
+            ]
 
-    # Add 'category' and 'gender' columns if they don't exist, for frontend display
-    filtered_df['category'] = category
-    filtered_df['gender'] = gender
+            if rank_column in colleges_meeting_criteria.columns:
+                cols_to_return.append(rank_column)
+            
+            existing_cols = [col for col in cols_to_return if col in colleges_meeting_criteria.columns]
+            
+            final_predictions_df = colleges_meeting_criteria[existing_cols].copy()
+            
+            if rank_column in final_predictions_df.columns:
+                final_predictions_df.rename(columns={rank_column: 'ClosingRank'}, inplace=True)
+            
+            predicted_colleges_list = []
+            for index, row in final_predictions_df.iterrows():
+                row_dict = row.to_dict()
+                row_dict['category'] = category 
+                row_dict['gender'] = gender     
+                predicted_colleges_list.append(row_dict)
 
-    # Select only the columns needed for the frontend display, including 'Inst Code'
-    display_columns = [
-        'Inst Code', # Explicitly include 'Inst Code'
-        'College Name',
-        'Branch Name',
-        'ClosingRank',
-        'Year',
-        'Phase',
-        'category',
-        'gender'
-    ]
-    
-    # Filter out display_columns that might not exist in the DataFrame (e.g., if a CSV is missing a column)
-    actual_display_columns = [col for col in display_columns if col in filtered_df.columns]
-    
-    predictions = filtered_df[actual_display_columns].to_dict(orient='records')
+        else:
+            print(f"Error: Rank column '{rank_column}' not found in data for year {year_preference}, phase {phase_preference}.")
+            return jsonify({'predictions': [], 'error': f"Data for category/gender ('{category} {gender}') is not available for {year_preference} {phase_preference}. Please check your data's column names or try different inputs."}), 400
 
-    return jsonify({'predictions': predictions})
+        if not predicted_colleges_list:
+             return jsonify({'predictions': [], 'message': 'No colleges found for the given criteria. Try adjusting your rank or preferences.'}), 200
+
+        return jsonify({'predictions': predicted_colleges_list})
+
+    except KeyError as e:
+        return jsonify({'predictions': [], 'error': f"Missing data in request: {e}. Please ensure all fields are submitted from the frontend."}), 400
+    except ValueError as e:
+        return jsonify({'predictions': [], 'error': f"Invalid input: {e}. Rank must be a number."}), 400
+    except Exception as e:
+        print(f"An unexpected error occurred in /predict route: {e}")
+        return jsonify({'predictions': [], 'error': f"An internal server error occurred: {e}"}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5000)
