@@ -6,7 +6,7 @@ function App() {
   const [category, setCategory] = useState('OC');
   const [gender, setGender] = useState('BOYS');
   const [yearPreference, setYearPreference] = useState('2024');
-  const [phasePreference, setPhasePreference] = useState('Phase 1'); // Changed default to Phase 1
+  const [phasePreference, setPhasePreference] = useState('Phase 1'); // Keep default as Phase 1
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -23,7 +23,8 @@ function App() {
     setError(null);
 
     try {
-      const flaskApiUrl = 'https://rankcet.onrender.com/predict';
+      // Use your deployed Render backend URL here
+      const flaskApiUrl = 'https://rankcet.onrender.com/predict'; // Make sure this is YOUR Render URL
 
       const response = await fetch(flaskApiUrl, {
         method: 'POST',
@@ -77,12 +78,10 @@ function App() {
   return (
     <div className="app-container">
       <div className="glass-card">
-        {/* Explicitly wrapping all direct children of glass-card in a React Fragment */}
         <>
           <h1>🎓 RANKCET - TS EAMCET 2024 College Predictor</h1>
           <p>Find the best colleges based on your rank, category, and counselling round.</p>
 
-          {/* This is the input section */}
           <div className="input-section">
             <input
               type="number"
@@ -114,7 +113,6 @@ function App() {
             </select>
 
             <select value={phasePreference} onChange={(e) => setPhasePreference(e.target.value)}>
-                {/* Reordered options */}
                 <option value="Phase 1">Phase 1</option>
                 <option value="Phase 2">Phase 2</option>
                 <option value="Final Phase">Final Phase</option>
@@ -123,11 +121,10 @@ function App() {
             <button onClick={handleFindColleges} disabled={loading}>
               {loading ? 'Finding...' : 'Find Colleges'}
             </button>
-          </div> {/* End input-section */}
+          </div>
 
           {error && <p className="error-message">{error}</p>}
 
-          {/* This is the results section */}
           <div className="results-section">
             {results.length === 0 && !loading && !error ? (
               <p>No colleges to show. Enter your details and click "Find Colleges".</p>
@@ -138,12 +135,16 @@ function App() {
                 <table className="results-table">
                   <thead>
                     <tr>
+                      {/* NEW: College Code column */}
+                      <th>Code</th>
                       <th>College Name</th><th>Branch</th><th>Category/Gender</th><th>Closing Rank</th><th>Year</th><th>Phase</th>
                     </tr>
                   </thead>
                   <tbody>
                     {results.map((college, idx) => (
                       <tr key={idx}>
+                        {/* Display College Code */}
+                        <td>{college['College Code']}</td>
                         <td>{college['College Name']}</td>
                         <td>{college['Branch Name']}</td>
                         <td>{`${college.category} ${college.gender}`}</td>
@@ -156,8 +157,8 @@ function App() {
                 </table>
               </div>
             )}
-          </div> {/* End results-section */}
-        </> {/* End React Fragment */}
+          </div>
+        </>
       </div>
     </div>
   );
