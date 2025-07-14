@@ -100,3 +100,4 @@ When running locally, the flaskApiUrl constant in frontend/src/App.js should be 
 
 🙏 Acknowledgements
 This project was developed with the aid of various programming tools and learning resources.
+
