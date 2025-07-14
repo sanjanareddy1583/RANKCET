@@ -12,16 +12,13 @@ final_combined_df = pd.DataFrame()
 def load_and_combine_data():
     global final_combined_df
     
-    # --- CRITICAL FIX: Correctly reference the 'DATA' folder capitalization ---
-    # This ensures the 'data' directory is found relative to app.py's location
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    data_dir = os.path.join(base_dir, 'DATA') # Changed 'data' to 'DATA'
+    data_dir = os.path.join(base_dir, 'DATA') 
     
     print(f"DEBUG: Current working directory: {os.getcwd()}")
     print(f"DEBUG: app.py directory: {base_dir}")
     print(f"Attempting to load data from: {data_dir}")
     
-    # --- NEW: Print contents of the backend directory for debugging ---
     try:
         print(f"DEBUG: Contents of {base_dir}: {os.listdir(base_dir)}")
         if os.path.exists(data_dir):
@@ -31,7 +28,6 @@ def load_and_combine_data():
     except Exception as e:
         print(f"DEBUG: Could not list contents or access data_dir: {e}")
 
-    # Check if the data directory actually exists
     if not os.path.exists(data_dir):
         print(f"Error: Data directory '{data_dir}' does not exist. Please ensure it's in your GitHub repo and correctly capitalized ('DATA').")
         raise FileNotFoundError(f"Data directory '{data_dir}' not found.")
@@ -40,49 +36,48 @@ def load_and_combine_data():
 
     df_list = []
     print("Attempting to load data from CSVs...")
-    for f_path in all_files: # Renamed 'f' to 'f_path' to avoid confusion with 'f' string formatting
+    for f_path in all_files:
         try:
-            # Read CSV, skipping the first row (header is in second row)
             df = pd.read_csv(f_path, skiprows=[0])
             
-            # Rename columns for consistency and easier access
+            # --- CRITICAL FIX: Match CSV headers exactly, including newlines and spaces ---
             df.rename(columns={
-                'Inst Code': 'Inst Code', # Explicitly keep 'Inst Code' as is
+                'Inst\n Code': 'Inst Code', # Fix for Inst Code
                 'Institute Name': 'College Name',
-                'Dist Code': 'District Code',
-                'Co Education': 'Co Education',
-                'College Type': 'College Type',
-                'Year of Estab': 'Year of Establishment',
-                'Branch Code': 'Branch Code',
-                'Branch Name': 'Branch Name',
-                'OC Boys': 'OC BOYS',
-                'OC Girls': 'OC GIRLS',
-                'BC-A Boys': 'BC_A BOYS',
-                'BC-A Girls': 'BC_A GIRLS',
-                'BC-B Boys': 'BC_B BOYS',
-                'BC-B Girls': 'BC_B GIRLS',
-                'BC-C Boys': 'BC_C BOYS',
-                'BC-C Girls': 'BC_C GIRLS',
-                'BC-D Boys': 'BC_D BOYS',
-                'BC-D Girls': 'BC_D GIRLS',
-                'BC-E Boys': 'BC_E BOYS',
-                'BC-E Girls': 'BC_E GIRLS',
-                'SC Boys': 'SC BOYS',
-                'SC Girls': 'SC GIRLS',
-                'ST Boys': 'ST BOYS',
-                'ST Girls': 'ST GIRLS',
-                'EWS GEN OU': 'EWS BOYS', # Mapping from CSV header 'EWS GEN OU'
-                'EWS GIRLS OU': 'EWS GIRLS', # Mapping from CSV header 'EWS GIRLS OU'
-                'Tuition Fee': 'Tuition Fee',
-                'Affiliated To': 'Affiliated To',
+                'Dist\nCode': 'District Code', # Fix for Dist Code
+                'Co Education': 'Co Education', # This seems correct
+                'College Type': 'College Type', # This seems correct
+                'Year of Estab': 'Year of Establishment', # This seems correct
+                'Branch Code': 'Branch Code', # This seems correct
+                'Branch Name': 'Branch Name', # This seems correct
+                'OC\nBOYS': 'OC BOYS', # Fix for OC BOYS
+                'OC\nGIRLS': 'OC GIRLS', # Fix for OC GIRLS
+                'BC_A\nBOYS': 'BC_A BOYS', # Fix for BC_A BOYS
+                'BC_A\nGIRLS': 'BC_A GIRLS', # Fix for BC_A GIRLS
+                'BC_B\nBOYS': 'BC_B BOYS', # Fix for BC_B BOYS
+                'BC_B\nGIRLS': 'BC_B GIRLS', # Fix for BC_B GIRLS
+                'BC_C\nBOYS': 'BC_C BOYS', # Fix for BC_C BOYS
+                'BC_C\nGIRLS': 'BC_C GIRLS', # Fix for BC_C GIRLS
+                'BC_D\nBOYS': 'BC_D BOYS', # Fix for BC_D BOYS
+                'BC_D\nGIRLS': 'BC_D GIRLS', # Fix for BC_D GIRLS
+                'BC_E\nBOYS': 'BC_E BOYS', # Fix for BC_E BOYS
+                'BC_E\nGIRLS': 'BC_E GIRLS', # Fix for BC_E GIRLS
+                'SC\nBOYS': 'SC BOYS', # Fix for SC BOYS
+                'SC\nGIRLS': 'SC GIRLS', # Fix for SC GIRLS
+                'ST\nBOYS': 'ST BOYS', # Fix for ST BOYS
+                'ST\nGIRLS': 'ST GIRLS', # Fix for ST GIRLS
+                'EWS\nGEN OU': 'EWS BOYS', # Mapping from CSV header 'EWS GEN OU'
+                'EWS\nGIRLS OU': 'EWS GIRLS', # Mapping from CSV header 'EWS GIRLS OU'
+                'Tuition Fee': 'Tuition Fee', # This seems correct
+                'Affiliated To': 'Affiliated To', # This seems correct
             }, inplace=True)
 
-            # Ensure 'Inst Code' column exists and is string type
+            # Ensure 'Inst Code' column exists and is string type AFTER renaming
             if 'Inst Code' in df.columns:
                 df['Inst Code'] = df['Inst Code'].astype(str)
             else:
-                print(f"Warning: 'Inst Code' column not found in {os.path.basename(f_path)}. Adding empty column.")
-                df['Inst Code'] = '' # Add an empty column if not found to prevent errors
+                print(f"Warning: 'Inst Code' column still not found after renaming in {os.path.basename(f_path)}. Adding empty column.")
+                df['Inst Code'] = '' 
 
             # Extract Year and Phase from filename
             filename = os.path.basename(f_path)
@@ -123,11 +118,13 @@ def predict():
     if not all([rank, category, gender, year_preference, phase_preference]):
         return jsonify({'error': 'Missing data. Please provide rank, category, gender, year, and phase.'}), 400
 
+    # Construct the rank column name using the standardized format
     rank_column = f"{category} {gender}"
 
     # Filter the DataFrame based on user inputs
     if rank_column not in final_combined_df.columns:
-        return jsonify({'error': f"Rank column '{rank_column}' not found in data."}), 400
+        # This error should now be less likely if renaming is correct
+        return jsonify({'error': f"Rank column '{rank_column}' not found in data after processing."}), 400
 
     filtered_df = final_combined_df[
         (final_combined_df['Year'] == int(year_preference)) &

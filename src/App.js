@@ -25,7 +25,7 @@ function App() {
     try {
       // Use your deployed Render backend URL here
       // IMPORTANT: Ensure this URL is correct for your deployed Flask backend
-      const flaskApiUrl = 'https://rankcet.onrender.com/predict'; 
+      const flaskApiUrl = 'https://rankcet.onrender.com/predict'; // MAKE SURE THIS IS YOUR CORRECT RENDER URL
 
       const response = await fetch(flaskApiUrl, {
         method: 'POST',
