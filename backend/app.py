@@ -1,5 +1,3 @@
-# RANKCET_Project/backend/app.py
-
 import pandas as pd
 from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
@@ -22,20 +20,13 @@ def load_and_combine_data():
         try:
             # Read CSV, skipping the first row (header is in second row)
             df = pd.read_csv(f, skiprows=[0])
-
+            
             # Rename columns for consistency and easier access
-            # IMPORTANT: Ensure 'Inst Code' is renamed to 'College Code'
+            # IMPORTANT: We are now keeping 'Inst Code' as 'Inst Code'
             df.rename(columns={
-                'College Code': 'College Code', # Keep this if it's already named this way
-                'Inst Code': 'College Code', # Add this line to rename 'Inst Code' to 'College Code'
-                'College Name': 'College Name',
-                'Place': 'Place',
-                'District Code': 'District Code',
+                #'College Code': 'College Code', # If your CSV has this, keep it.
                 'Co-Education': 'Co Education', # Handle potential hyphen
-                'College Type': 'College Type',
-                'Year of Establishment': 'Year of Establishment',
                 'Branch Code': 'Branch Code',
-                'Branch Name': 'Branch Name',
                 'OC Boys': 'OC BOYS',
                 'OC Girls': 'OC GIRLS',
                 'BC-A Boys': 'BC_A BOYS', # Standardize BC categories
@@ -56,8 +47,8 @@ def load_and_combine_data():
                 'EWS Girls': 'EWS GIRLS',
                 'Tuition Fee': 'Tuition Fee',
                 'Affiliated To': 'Affiliated To',
-                'Year': 'Year',
-                'Phase': 'Phase'
+                # Ensure 'College Name', 'Place', 'District Code', 'College Type', 'Year of Establishment', 'Branch Name', 'Year', 'Phase' are correctly mapped if their CSV names differ.
+                # For 'Inst Code', we assume it's already named 'Inst Code' in the CSV and we want to keep it.
             }, inplace=True)
 
             # Extract Year and Phase from filename if not present or incorrect
@@ -70,7 +61,7 @@ def load_and_combine_data():
                 df['Phase'] = 'Phase 2'
             elif 'FinalPhase' in filename:
                 df['Phase'] = 'Final Phase'
-
+            
             df_list.append(df)
             print(f"Loaded {os.path.basename(f)}")
         except Exception as e:
@@ -78,9 +69,9 @@ def load_and_combine_data():
 
     if df_list:
         final_combined_df = pd.concat(df_list, ignore_index=True)
-        # Ensure 'College Code' is treated as string to avoid float issues if some are numbers
-        if 'College Code' in final_combined_df.columns:
-            final_combined_df['College Code'] = final_combined_df['College Code'].astype(str)
+        # Ensure 'Inst Code' is treated as string if it exists
+        if 'Inst Code' in final_combined_df.columns:
+            final_combined_df['Inst Code'] = final_combined_df['Inst Code'].astype(str)
         print("All EAMCET data combined successfully.")
         print("Final Combined DataFrame Columns:", final_combined_df.columns.tolist())
     else:
@@ -92,7 +83,6 @@ load_and_combine_data()
 @app.route('/predict', methods=['POST'])
 @cross_origin()
 def predict():
-    # ... (rest of your predict function remains the same) ...
     data = request.get_json()
     rank = data.get('rank')
     category = data.get('category')
@@ -103,34 +93,17 @@ def predict():
     if not all([rank, category, gender, year_preference, phase_preference]):
         return jsonify({'error': 'Missing data. Please provide rank, category, gender, year, and phase.'}), 400
 
-    # Convert category and gender to the format used in DataFrame columns
     rank_column = f"{category} {gender}"
 
-    # Filter the DataFrame based on user inputs
-    # Ensure 'College Code' is included in the filtering if needed, or just in the output
     filtered_df = final_combined_df[
         (final_combined_df['Year'] == int(year_preference)) &
         (final_combined_df['Phase'] == phase_preference) &
-        (final_combined_df[rank_column] >= rank) # Filter by rank
-    ].copy() # Use .copy() to avoid SettingWithCopyWarning
+        (final_combined_df[rank_column] >= rank)
+    ].copy()
 
-    # Sort by ClosingRank (ascending)
     filtered_df.sort_values(by=rank_column, ascending=True, inplace=True)
 
-    # Select only the columns needed for the frontend display, including 'College Code'
-    # Ensure 'College Code' is explicitly selected here
-    display_columns = [
-        'College Code', # Explicitly include this column
-        'College Name',
-        'Branch Name',
-        'ClosingRank', # This column seems to be dynamically created or inferred. Let's ensure it's there.
-        'Year',
-        'Phase',
-        'category', # Include original category for display
-        'gender'    # Include original gender for display
-    ]
-
-    # Create 'ClosingRank' column if it doesn't exist (it should be `rank_column` values)
+    # Ensure 'ClosingRank' column exists for consistent frontend display
     if 'ClosingRank' not in filtered_df.columns:
         filtered_df['ClosingRank'] = filtered_df[rank_column]
 
@@ -140,15 +113,25 @@ def predict():
     if 'gender' not in filtered_df.columns:
         filtered_df['gender'] = gender
 
-
-    # Select only the relevant columns for the output JSON
-    # Filter out display_columns that might not exist in the DataFrame
+    # Select only the columns needed for the frontend display, including 'Inst Code'
+    display_columns = [
+        'Inst Code', # Explicitly include 'Inst Code'
+        'College Name',
+        'Branch Name',
+        'ClosingRank',
+        'Year',
+        'Phase',
+        'category',
+        'gender'
+    ]
+    
+    # Filter out display_columns that might not exist in the DataFrame (e.g., if a CSV is missing a column)
     actual_display_columns = [col for col in display_columns if col in filtered_df.columns]
-
-    # Convert filtered_df to a list of dictionaries
+    
     predictions = filtered_df[actual_display_columns].to_dict(orient='records')
 
     return jsonify({'predictions': predictions})
 
 if __name__ == '__main__':
     app.run(debug=True)
+
