@@ -6,7 +6,7 @@ function App() {
   const [category, setCategory] = useState('OC');
   const [gender, setGender] = useState('BOYS');
   const [yearPreference, setYearPreference] = useState('2024');
-  const [phasePreference, setPhasePreference] = useState('Final Phase');
+  const [phasePreference, setPhasePreference] = useState('Phase 1'); // Changed default to Phase 1
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -114,9 +114,10 @@ function App() {
             </select>
 
             <select value={phasePreference} onChange={(e) => setPhasePreference(e.target.value)}>
-                <option value="Final Phase">Final Phase</option>
+                {/* Reordered options */}
                 <option value="Phase 1">Phase 1</option>
                 <option value="Phase 2">Phase 2</option>
+                <option value="Final Phase">Final Phase</option>
             </select>
 
             <button onClick={handleFindColleges} disabled={loading}>
