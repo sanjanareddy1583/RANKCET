@@ -12,38 +12,42 @@ final_combined_df = pd.DataFrame()
 def load_and_combine_data():
     global final_combined_df
     
-    # --- CRITICAL CHANGE: Use an absolute path for data_dir ---
+    # --- CRITICAL FIX: Correctly reference the 'DATA' folder capitalization ---
     # This ensures the 'data' directory is found relative to app.py's location
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    data_dir = os.path.join(base_dir, 'data')
+    data_dir = os.path.join(base_dir, 'DATA') # Changed 'data' to 'DATA'
     
-    print(f"DEBUG: Current working directory: {os.getcwd()}") # Added debug print
-    print(f"DEBUG: app.py directory: {base_dir}") # Added debug print
-    print(f"Attempting to load data from: {data_dir}") # Debugging print
+    print(f"DEBUG: Current working directory: {os.getcwd()}")
+    print(f"DEBUG: app.py directory: {base_dir}")
+    print(f"Attempting to load data from: {data_dir}")
     
-    # --- NEW: Print contents of the backend directory ---
+    # --- NEW: Print contents of the backend directory for debugging ---
     try:
         print(f"DEBUG: Contents of {base_dir}: {os.listdir(base_dir)}")
+        if os.path.exists(data_dir):
+            print(f"DEBUG: Contents of {data_dir}: {os.listdir(data_dir)}")
+        else:
+            print(f"DEBUG: Data directory '{data_dir}' does not exist during os.listdir check.")
     except Exception as e:
-        print(f"DEBUG: Could not list contents of {base_dir}: {e}")
+        print(f"DEBUG: Could not list contents or access data_dir: {e}")
 
     # Check if the data directory actually exists
     if not os.path.exists(data_dir):
-        print(f"Error: Data directory '{data_dir}' does not exist. Please ensure it's in your GitHub repo and correctly capitalized.")
-        # Raise an error to stop deployment if data is missing
+        print(f"Error: Data directory '{data_dir}' does not exist. Please ensure it's in your GitHub repo and correctly capitalized ('DATA').")
         raise FileNotFoundError(f"Data directory '{data_dir}' not found.")
         
     all_files = [os.path.join(data_dir, f) for f in os.listdir(data_dir) if f.endswith('.csv')]
 
     df_list = []
     print("Attempting to load data from CSVs...")
-    for f in all_files:
+    for f_path in all_files: # Renamed 'f' to 'f_path' to avoid confusion with 'f' string formatting
         try:
             # Read CSV, skipping the first row (header is in second row)
-            df = pd.read_csv(f, skiprows=[0])
+            df = pd.read_csv(f_path, skiprows=[0])
             
             # Rename columns for consistency and easier access
             df.rename(columns={
+                'Inst Code': 'Inst Code', # Explicitly keep 'Inst Code' as is
                 'Institute Name': 'College Name',
                 'Dist Code': 'District Code',
                 'Co Education': 'Co Education',
@@ -58,9 +62,9 @@ def load_and_combine_data():
                 'BC-B Boys': 'BC_B BOYS',
                 'BC-B Girls': 'BC_B GIRLS',
                 'BC-C Boys': 'BC_C BOYS',
-                'BC_C Girls': 'BC_C GIRLS',
+                'BC-C Girls': 'BC_C GIRLS',
                 'BC-D Boys': 'BC_D BOYS',
-                'BC_D Girls': 'BC_D GIRLS',
+                'BC-D Girls': 'BC_D GIRLS',
                 'BC-E Boys': 'BC_E BOYS',
                 'BC-E Girls': 'BC_E GIRLS',
                 'SC Boys': 'SC BOYS',
@@ -71,18 +75,17 @@ def load_and_combine_data():
                 'EWS GIRLS OU': 'EWS GIRLS', # Mapping from CSV header 'EWS GIRLS OU'
                 'Tuition Fee': 'Tuition Fee',
                 'Affiliated To': 'Affiliated To',
-                # 'Inst Code' is assumed to be correctly named and present in CSV, no renaming for it here.
             }, inplace=True)
 
             # Ensure 'Inst Code' column exists and is string type
             if 'Inst Code' in df.columns:
                 df['Inst Code'] = df['Inst Code'].astype(str)
             else:
-                print(f"Warning: 'Inst Code' column not found in {os.path.basename(f)}. Adding empty column.")
+                print(f"Warning: 'Inst Code' column not found in {os.path.basename(f_path)}. Adding empty column.")
                 df['Inst Code'] = '' # Add an empty column if not found to prevent errors
 
             # Extract Year and Phase from filename
-            filename = os.path.basename(f)
+            filename = os.path.basename(f_path)
             if '2024' in filename:
                 df['Year'] = 2024
             if 'Phase1' in filename:
@@ -93,9 +96,9 @@ def load_and_combine_data():
                 df['Phase'] = 'Final Phase'
             
             df_list.append(df)
-            print(f"Loaded {os.path.basename(f)}")
+            print(f"Loaded {os.path.basename(f_path)}")
         except Exception as e:
-            print(f"Error loading {f}: {e}")
+            print(f"Error loading {f_path}: {e}")
 
     if df_list:
         final_combined_df = pd.concat(df_list, ignore_index=True)
@@ -166,4 +169,3 @@ def predict():
 
 if __name__ == '__main__':
     app.run(debug=True)
-
