@@ -31,11 +31,15 @@ This application was developed using a modern web development stack to ensure a 
 
 2. Pandas: A powerful Python library for data manipulation and analysis, crucial for efficiently loading, filtering, and processing the large CSV datasets of college cutoffs.
 
+
+
 ⚪ Deployment:
 
 1. Vercel: Utilized for deploying the React frontend, providing seamless continuous deployment from GitHub, automatic SSL, and a global CDN.
 
 2. Render: Used for deploying the Flask backend API, offering a straightforward platform for web service deployment, environment setup, and Python dependency management.
+
+
 
 📊 Data Source
 The core of this college predictor relies on comprehensive cutoff data. The college cutoff information was sourced directly from official TS EAMCET 2024 last rank statements. This data is provided in structured CSV (Comma Separated Values) format and is stored within the backend/DATA directory of this repository. Each CSV file corresponds to a specific counselling phase for the 2024 academic year.
@@ -59,10 +63,8 @@ The project was set up and run locally for development and testing using the fol
 ⏺️ Git: For initializing the repository and managing version control.
 
 
-
 1. Repository Setup
 First, this project repository was initialized and set up on the local machine using Git:
-
 git init
 git add .
 git commit -m "Initial commit of RANKCET project"
@@ -70,7 +72,6 @@ git commit -m "Initial commit of RANKCET project"
 git remote add origin https://github.com/sanjanareddy1583/RANKCET.git
 git push -u origin main # or master
 
-(Note: If you already have the repository on your local machine, you might skip git init and git remote add origin if it's already connected to your GitHub.)
 
 2. Backend Setup (Flask)
 The backend directory was navigated into. Here, a Python virtual environment was set up, necessary Python packages (listed in requirements.txt) were installed, and the Flask development server was started.
